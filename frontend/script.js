@@ -5,7 +5,7 @@ const API_URL = '/api';
 let currentSessionId = null;
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatBtn;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, newChatBtn, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,10 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     newChatBtn = document.querySelector('.new-chat-btn');
+    themeToggle = document.getElementById('themeToggle');
 
     setupEventListeners();
     createNewSession();
     loadCourseStats();
+    initTheme();
 });
 
 // Event Listeners
@@ -42,6 +44,9 @@ function setupEventListeners() {
 
     // New Chat button
     newChatBtn.addEventListener('click', handleNewChat);
+
+    // Theme toggle
+    themeToggle.addEventListener('click', toggleTheme);
 }
 
 
@@ -220,5 +225,27 @@ async function loadCourseStats() {
         if (courseTitles) {
             courseTitles.innerHTML = '<span class="error">Failed to load courses</span>';
         }
+    }
+}
+
+// Theme Management
+const THEME_KEY = 'theme-preference';
+
+function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'light' ? null : 'light';
+    if (next) {
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem(THEME_KEY, next);
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem(THEME_KEY, 'dark');
     }
 }

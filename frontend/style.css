@@ -131,6 +131,7 @@ header h1 {
     width: 100%;
     max-width: 800px;
     margin: 0;
+    position: relative;
 }
 
 /* Chat Messages */
@@ -766,4 +767,110 @@ details[open] .suggested-header::before {
     .sidebar {
         width: 280px;
     }
+}
+
+/* ============================================
+   Light Theme
+   ============================================ */
+[data-theme="light"] {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --user-message: #2563eb;
+    --assistant-message: #f1f5f9;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --focus-ring: rgba(37, 99, 235, 0.2);
+    --welcome-bg: #eff6ff;
+    --welcome-border: #bfdbfe;
+}
+
+[data-theme="light"] .message.assistant .message-content {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .message.welcome-message .message-content {
+    background: var(--welcome-bg);
+    border-color: var(--welcome-border);
+}
+
+[data-theme="light"] .chat-messages::-webkit-scrollbar-track {
+    background: var(--surface);
+}
+
+[data-theme="light"] .chat-messages::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+}
+
+[data-theme="light"] .chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* ============================================
+   Theme Toggle Button
+   ============================================ */
+.theme-toggle {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: var(--surface-hover);
+    transform: scale(1.05);
+}
+
+.theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+    border-color: var(--primary-color);
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Icon visibility */
+.theme-toggle .sun-icon {
+    display: block;
+}
+
+.theme-toggle .moon-icon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .sun-icon {
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .moon-icon {
+    display: block;
+}
+
+/* Smooth theme transition on body */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
