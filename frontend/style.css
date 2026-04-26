@@ -220,29 +220,54 @@ header h1 {
 
 /* Collapsible Sources */
 .sources-collapsible {
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
 }
 
 .sources-collapsible summary {
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
+    padding: 0.35rem 0.5rem;
     user-select: none;
-    font-weight: 500;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 4px;
+    transition: all 0.15s ease;
 }
 
 .sources-collapsible summary:hover {
-    color: var(--text-primary);
+    color: var(--primary-color);
+    background: var(--surface-hover);
 }
 
 .sources-collapsible[open] summary {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
 }
 
 .sources-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
     padding: 0 0.5rem 0.25rem 1.5rem;
     color: var(--text-secondary);
+}
+
+.source-item {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 0.25rem 0;
+}
+
+.source-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.source-item a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
 }
 
 /* Markdown formatting styles */
@@ -445,6 +470,32 @@ header h1 {
     margin: 0.5rem 0;
 }
 
+/* New Chat Button */
+.new-chat-btn {
+    display: block;
+    width: 100%;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    border: none;
+    background: none;
+    text-align: left;
+    transition: color 0.2s ease;
+}
+
+.new-chat-btn:focus {
+    color: var(--primary-color);
+}
+
+.new-chat-btn:hover {
+    color: var(--primary-color);
+}
+
 /* Sidebar Headers */
 .stats-header,
 .suggested-header {
@@ -605,33 +656,33 @@ details[open] .suggested-header::before {
 .suggested-items {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.75rem 0;
+    gap: 0.25rem;
+    padding: 0.5rem 0;
 }
 
 .suggested-item {
-    padding: 0.75rem 1rem;
-    background: var(--background);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 6px;
     color: var(--text-primary);
     font-size: 0.875rem;
+    line-height: 1.5;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
     text-align: left;
     width: 100%;
 }
 
 .suggested-item:focus {
     outline: none;
-    box-shadow: 0 0 0 3px var(--focus-ring);
+    background: var(--surface-hover);
 }
 
 .suggested-item:hover {
     background: var(--surface-hover);
-    border-color: var(--primary-color);
     color: var(--primary-color);
-    transform: translateX(2px);
 }
 
 /* Responsive Design */

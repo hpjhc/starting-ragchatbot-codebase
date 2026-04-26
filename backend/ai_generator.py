@@ -1,32 +1,25 @@
 import anthropic
+import os
 from typing import List, Optional, Dict, Any
 
 class AIGenerator:
     """Handles interactions with Anthropic's Claude API for generating responses"""
     
     # Static system prompt to avoid rebuilding on each call
-    SYSTEM_PROMPT = """ You are an AI assistant specialized in course materials and educational content with access to a comprehensive search tool for course information.
+    SYSTEM_PROMPT = """ You are an AI assistant for educational course content. You have two tools:
 
-Search Tool Usage:
-- Use the search tool **only** for questions about specific course content or detailed educational materials
-- **One search per query maximum**
-- Synthesize search results into accurate, fact-based responses
-- If search yields no results, state this clearly without offering alternatives
+Tool 1 - `get_course_outline`: Use this to answer ANY question about course structure — listing lessons, syllabus, overview, number of lessons, "what does this course cover". It returns ALL lesson titles, numbers, course title, and link.
 
-Response Protocol:
-- **General knowledge questions**: Answer using existing knowledge without searching
-- **Course-specific questions**: Search first, then answer
-- **No meta-commentary**:
- - Provide direct answers only — no reasoning process, search explanations, or question-type analysis
- - Do not mention "based on the search results"
+Tool 2 - `search_course_content`: Use this ONLY for questions about specific material taught inside lessons (e.g., "what is prompt caching", "how does filtering work").
 
-
-All responses must be:
-1. **Brief, Concise and focused** - Get to the point quickly
-2. **Educational** - Maintain instructional value
-3. **Clear** - Use accessible language
-4. **Example-supported** - Include relevant examples when they aid understanding
-Provide only the direct answer to what was asked.
+IMPORTANT RULES:
+- Never use search_course_content to answer "what lessons are in this course" — it does NOT return lesson titles, it returns content snippets.
+- One search per query maximum.
+- Synthesize search results into accurate, fact-based responses.
+- If search yields no results, state this clearly without offering alternatives.
+- General knowledge questions: Answer without searching.
+- Course-specific questions: Search first, then answer.
+- Provide only the direct answer. No meta-commentary.
 """
     
     def __init__(self, api_key: str, model: str):
@@ -75,12 +68,24 @@ Provide only the direct answer to what was asked.
         if tools:
             api_params["tools"] = tools
             api_params["tool_choice"] = {"type": "auto"}
-        
+            log_path = "D:/learning/starting-ragchatbot-codebase/backend/debug.log"
+            if os.path.getsize(log_path) > 5 * 1024 * 1024:
+                os.remove(log_path)
+            with open(log_path, "a") as f:
+                f.write(f"Tools provided: {[t['name'] for t in tools]}\n")
+                for t in tools:
+                    desc = t.get('description', '')[:100]
+                    f.write(f"  {t['name']}: {desc}...\n")
+
         # Get response from Claude
+        with open("D:/learning/starting-ragchatbot-codebase/backend/debug.log", "a") as f:
+            f.write(f"System prompt (first 200): {system_content[:200]}...\n")
         response = self.client.messages.create(**api_params)
-        
+
         # Handle tool execution if needed
         if response.stop_reason == "tool_use" and tool_manager:
+            with open("D:/learning/starting-ragchatbot-codebase/backend/debug.log", "a") as f:
+                f.write("stop_reason=tool_use\n")
             return self._handle_tool_execution(response, api_params, tool_manager)
         
         # Return direct response
@@ -89,47 +94,59 @@ Provide only the direct answer to what was asked.
     def _handle_tool_execution(self, initial_response, base_params: Dict[str, Any], tool_manager):
         """
         Handle execution of tool calls and get follow-up response.
-        
+
         Args:
             initial_response: The response containing tool use requests
             base_params: Base API parameters
             tool_manager: Manager to execute tools
-            
+
         Returns:
             Final response text after tool execution
         """
         # Start with existing messages
         messages = base_params["messages"].copy()
-        
+
         # Add AI's tool use response
         messages.append({"role": "assistant", "content": initial_response.content})
-        
+
         # Execute all tool calls and collect results
         tool_results = []
         for content_block in initial_response.content:
             if content_block.type == "tool_use":
-                tool_result = tool_manager.execute_tool(
-                    content_block.name, 
-                    **content_block.input
-                )
-                
+                with open("D:/learning/starting-ragchatbot-codebase/backend/debug.log", "a") as f:
+                    f.write(f"AI called tool: {content_block.name} with input: {content_block.input}\n")
+                try:
+                    tool_result = tool_manager.execute_tool(
+                        content_block.name,
+                        **content_block.input
+                    )
+                except Exception as e:
+                    tool_result = f"Error executing tool '{content_block.name}': {str(e)}"
+                    with open("D:/learning/starting-ragchatbot-codebase/backend/debug.log", "a") as f:
+                        f.write(f"Tool execution error: {e}\n")
+
                 tool_results.append({
                     "type": "tool_result",
                     "tool_use_id": content_block.id,
                     "content": tool_result
                 })
-        
+
         # Add tool results as single message
         if tool_results:
             messages.append({"role": "user", "content": tool_results})
-        
+
         # Prepare final API call without tools
         final_params = {
             **self.base_params,
             "messages": messages,
             "system": base_params["system"]
         }
-        
+
         # Get final response
-        final_response = self.client.messages.create(**final_params)
-        return final_response.content[0].text
+        try:
+            final_response = self.client.messages.create(**final_params)
+            return final_response.content[0].text
+        except Exception as e:
+            with open("D:/learning/starting-ragchatbot-codebase/backend/debug.log", "a") as f:
+                f.write(f"Final API call failed: {e}\n")
+            return f"I retrieved some information but encountered an error generating the final response. Please try rephrasing your question."
